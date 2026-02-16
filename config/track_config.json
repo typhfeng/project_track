@@ -1,7 +1,15 @@
 {
   "owner": "typhfeng",
   "scan_roots": [
-    "/Users/sunkewei"
+    "/Users/sunkewei/git/typhfeng"
+  ],
+  "include_repos": [
+    "/Users/sunkewei/work/daytalk2026",
+    "/Users/sunkewei/finance/poly",
+    "/Users/sunkewei/finance/typhfeng/stk",
+    "/Users/sunkewei/work/ffinance/stk",
+    "/Users/sunkewei/trading/trading_moomoo",
+    "/Users/sunkewei/trading/WallTrading-Bot-MooMoo-Futu"
   ],
   "max_repo_depth": 8,
   "cache_ttl_seconds": 120,

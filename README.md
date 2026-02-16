@@ -55,4 +55,5 @@ Output:
 
 - This repo is independent from `/Users/sunkewei/work/daytalk2026`.
 - Default scan scope is `/Users/sunkewei`; edit `config/track_config.json` if needed.
+- `include_repos` in `config/track_config.json` is the authoritative monitored list.
 - Cache TTL defaults to 120 seconds to balance freshness and scan cost.

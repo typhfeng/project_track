@@ -21,6 +21,7 @@ COMMIT_ALERT_REGEX = re.compile(r"\b(fix|bug|error|fail|todo|problem|blocker|ris
 class RepoConfig:
     owner: str
     scan_roots: list[str]
+    include_repos: list[str]
     max_repo_depth: int
     cache_ttl_seconds: int
     exclude_paths: list[str]
@@ -33,6 +34,7 @@ def load_config(config_path: str) -> RepoConfig:
     return RepoConfig(
         owner=raw.get("owner", "typhfeng"),
         scan_roots=raw.get("scan_roots", []),
+        include_repos=raw.get("include_repos", []),
         max_repo_depth=int(raw.get("max_repo_depth", 6)),
         cache_ttl_seconds=int(raw.get("cache_ttl_seconds", 120)),
         exclude_paths=raw.get("exclude_paths", []),
@@ -47,6 +49,10 @@ def run_cmd(args: list[str]) -> tuple[int, str]:
 
 def discover_git_repos(cfg: RepoConfig) -> list[str]:
     repos: set[str] = set()
+    for repo in cfg.include_repos:
+        if Path(repo, ".git").is_dir():
+            repos.add(repo)
+
     for root in cfg.scan_roots:
         _, out = run_cmd([
             "find",
