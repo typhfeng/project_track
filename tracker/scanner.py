@@ -45,7 +45,14 @@ def load_config(config_path: str) -> RepoConfig:
 
 def run_cmd(args: list[str]) -> tuple[int, str]:
     try:
-        proc = subprocess.run(args, capture_output=True, text=True, check=False)
+        proc = subprocess.run(
+            args,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
         return proc.returncode, proc.stdout.strip()
     except FileNotFoundError:
         # Keep scanner resilient when optional tools are missing in PATH.

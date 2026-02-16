@@ -7,6 +7,16 @@ const colors = {
 
 let dashboard = null;
 let charts = {};
+let configData = null;
+
+function esc(s) {
+  return String(s || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
 
 function showError(message) {
   const summary = document.getElementById('summaryCards');
@@ -54,6 +64,7 @@ function setGeneratedAt() {
 }
 
 function renderSummaryCards() {
+  if (!dashboard) return;
   const s = dashboard.summary;
   const cards = [
     ['Tracked Repos', s.total_repos],
@@ -72,6 +83,7 @@ function renderSummaryCards() {
 }
 
 function renderTrackCards() {
+  if (!dashboard) return;
   const wrap = document.getElementById('trackCards');
   const entries = Object.entries(dashboard.track_summary);
   wrap.innerHTML = entries
@@ -98,6 +110,7 @@ function mountChart(id, config) {
 }
 
 function renderCharts() {
+  if (!dashboard) return;
   const labels = dashboard.trend.labels;
   const series = dashboard.trend.series;
 
@@ -192,6 +205,7 @@ function renderCharts() {
 }
 
 function renderRepoTable() {
+  if (!dashboard) return;
   const rows = dashboard.repos.map((r) => {
     const dirty = r.status.dirty.modified + r.status.dirty.untracked;
     const last = r.status.last_commit.date ? new Date(r.status.last_commit.date).toLocaleDateString() : '-';
@@ -253,6 +267,75 @@ function renderIssues(results, query) {
     .join('');
 }
 
+function renderManualRepoTable() {
+  const body = document.getElementById('manualRepoBody');
+  const meta = document.getElementById('manualRepoMeta');
+  if (!configData) {
+    body.innerHTML = '';
+    meta.textContent = '';
+    return;
+  }
+
+  const include = configData.include_repos || [];
+  const overrides = configData.track_overrides || {};
+  meta.textContent = `${include.length} manually included repos`;
+  body.innerHTML = include
+    .map((p) => {
+      const track = overrides[p] || 'auto';
+      return `
+        <tr>
+          <td><code>${esc(p)}</code></td>
+          <td>${esc(track)}</td>
+          <td><button class="btn-secondary" data-remove-path="${esc(p)}">Remove</button></td>
+        </tr>
+      `;
+    })
+    .join('');
+
+  body.querySelectorAll('button[data-remove-path]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const path = btn.getAttribute('data-remove-path');
+      await removeRepo(path);
+    });
+  });
+}
+
+async function loadConfig() {
+  const res = await fetch('/api/config');
+  const payload = await res.json();
+  if (!res.ok) {
+    throw new Error(payload.error || 'failed to load config');
+  }
+  configData = payload;
+  renderManualRepoTable();
+}
+
+async function addRepo(path, track) {
+  const res = await fetch('/api/repos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path, track })
+  });
+  const payload = await res.json();
+  if (!res.ok || !payload.ok) {
+    throw new Error(payload.error || 'failed to add repo');
+  }
+}
+
+async function removeRepo(path) {
+  const res = await fetch('/api/repos', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path })
+  });
+  const payload = await res.json();
+  if (!res.ok || !payload.ok) {
+    throw new Error(payload.error || 'failed to remove repo');
+  }
+  await loadConfig();
+  await loadDashboard(true);
+}
+
 async function loadDashboard(refresh = false) {
   const res = await fetch(`/api/dashboard${refresh ? '?refresh=1' : ''}`);
   const payload = await res.json();
@@ -295,9 +378,35 @@ function bindEvents() {
       renderIssues(data.results || [], q);
     }, 260);
   });
+
+  document.getElementById('addRepoBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('addRepoBtn');
+    const path = document.getElementById('repoPathInput').value.trim();
+    const track = document.getElementById('repoTrackSelect').value;
+    if (!path) {
+      showError('repo path is required');
+      return;
+    }
+    btn.disabled = true;
+    try {
+      await addRepo(path, track);
+      document.getElementById('repoPathInput').value = '';
+      await loadConfig();
+      await loadDashboard(true);
+    } catch (e) {
+      showError(e.message || 'failed to add repo');
+    } finally {
+      btn.disabled = false;
+    }
+  });
 }
 
 (async function bootstrap() {
-  bindEvents();
-  await loadDashboard(false);
+  try {
+    bindEvents();
+    await loadConfig();
+    await loadDashboard(false);
+  } catch (e) {
+    showError(e.message || 'bootstrap failed');
+  }
 })();

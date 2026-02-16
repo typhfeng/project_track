@@ -205,6 +205,35 @@ th {
   box-shadow: 0 0 0 3px var(--ring);
 }
 
+.select {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.72);
+  min-width: 180px;
+}
+
+.manual-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-secondary {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+}
+
 .issue-list {
   display: grid;
   gap: 10px;
@@ -282,6 +311,10 @@ th {
   .search {
     width: 100%;
     min-width: 0;
+  }
+
+  .select {
+    width: 100%;
   }
 }
 

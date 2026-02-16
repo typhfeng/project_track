@@ -34,6 +34,41 @@
 
       <section class="panel">
         <div class="panel-head">
+          <h2>Manual Repo Control</h2>
+        </div>
+        <div class="manual-row">
+          <input
+            id="repoPathInput"
+            class="search"
+            type="text"
+            placeholder="Local repo path, e.g. /Users/sunkewei/work/my-repo"
+          />
+          <select id="repoTrackSelect" class="select">
+            <option value="">Auto Track</option>
+            <option value="finance">Finance</option>
+            <option value="engineering">Engineering</option>
+            <option value="soc_auto_design">SoC Auto Design</option>
+            <option value="family">Family</option>
+          </select>
+          <button id="addRepoBtn" class="btn-primary">Add Repo</button>
+        </div>
+        <div id="manualRepoMeta" class="muted"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Override Track</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="manualRepoBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
           <h2>Track Summary</h2>
         </div>
         <div id="trackCards" class="track-cards"></div>
