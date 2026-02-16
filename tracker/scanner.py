@@ -27,19 +27,86 @@ class RepoConfig:
     cache_ttl_seconds: int
     exclude_paths: list[str]
     track_overrides: dict[str, str]
+    repo_manifest_path: str
+
+
+def _expand_path(path: str) -> str:
+    if not path:
+        return ""
+    return str(Path(os.path.expanduser(path)).resolve())
+
+
+def _resolve_manifest_path(config_path: str, raw_manifest_path: str) -> str:
+    if not raw_manifest_path:
+        return ""
+    p = Path(raw_manifest_path)
+    if p.is_absolute():
+        return str(p)
+    return str((Path(config_path).resolve().parent / p).resolve())
+
+
+def _load_manifest(manifest_path: str) -> tuple[str, list[dict[str, Any]]]:
+    if not manifest_path:
+        return "", []
+    p = Path(manifest_path)
+    if not p.is_file():
+        return "", []
+    with open(p, "r", encoding="utf-8") as f:
+        raw = json.load(f)
+    search_root = str(raw.get("search_root", "")).strip()
+    repos = raw.get("repos", [])
+    if not isinstance(repos, list):
+        repos = []
+    return search_root, repos
 
 
 def load_config(config_path: str) -> RepoConfig:
     with open(config_path, "r", encoding="utf-8") as f:
         raw = json.load(f)
+
+    scan_roots = [_expand_path(x) for x in raw.get("scan_roots", []) if str(x).strip()]
+    include_repos = [_expand_path(x) for x in raw.get("include_repos", []) if str(x).strip()]
+    exclude_paths = [_expand_path(x) for x in raw.get("exclude_paths", []) if str(x).strip()]
+    track_overrides_raw = raw.get("track_overrides", {})
+    track_overrides = {
+        _expand_path(k): v
+        for k, v in track_overrides_raw.items()
+        if str(k).strip() and str(v).strip()
+    }
+
+    manifest_path = _resolve_manifest_path(config_path, str(raw.get("repo_manifest_path", "")).strip())
+    manifest_search_root, manifest_repos = _load_manifest(manifest_path)
+    if manifest_search_root:
+        sr = _expand_path(manifest_search_root)
+        if sr:
+            scan_roots.insert(0, sr)
+    for item in manifest_repos:
+        if not isinstance(item, dict):
+            continue
+        if item.get("enabled", True) is False:
+            continue
+        mp = _expand_path(str(item.get("path", "")).strip())
+        if not mp:
+            continue
+        include_repos.append(mp)
+        track = str(item.get("track", "")).strip()
+        if track:
+            track_overrides[mp] = track
+
+    # de-duplicate while preserving order
+    scan_roots = list(dict.fromkeys(scan_roots))
+    include_repos = list(dict.fromkeys(include_repos))
+    exclude_paths = list(dict.fromkeys(exclude_paths))
+
     return RepoConfig(
         owner=raw.get("owner", "typhfeng"),
-        scan_roots=raw.get("scan_roots", []),
-        include_repos=raw.get("include_repos", []),
+        scan_roots=scan_roots,
+        include_repos=include_repos,
         max_repo_depth=int(raw.get("max_repo_depth", 6)),
         cache_ttl_seconds=int(raw.get("cache_ttl_seconds", 120)),
-        exclude_paths=raw.get("exclude_paths", []),
-        track_overrides=raw.get("track_overrides", {}),
+        exclude_paths=exclude_paths,
+        track_overrides=track_overrides,
+        repo_manifest_path=manifest_path,
     )
 
 

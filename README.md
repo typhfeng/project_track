@@ -29,11 +29,13 @@ A standalone Web GUI to monitor and analyze personal project progress across all
 
 - `app.py`: Flask Web service
 - `tracker/scanner.py`: repo discovery + metrics engine
-- `config/track_config.json`: scan roots, owner, track overrides
+- `config/track_config.json`: core scanner settings (`owner`, `scan_roots`, manifest path)
+- `config/repo_manifest.json`: manual repo address list (`path`, `track`, `enabled`)
 - `templates/index.html`: dashboard page
 - `static/styles.css`: UI style
 - `static/app.js`: dashboard logic and chart rendering
 - `scripts/sync_github_repos.py`: clone/sync all repos from GitHub owner
+- `scripts/rebuild_repo_manifest.py`: rebuild manifest from a root directory
 
 ## Run
 
@@ -67,9 +69,36 @@ Notes:
 - If `GITHUB_TOKEN` (or `GH_TOKEN`) is set for the same owner, private repos are included.
 - Without token, only public repos are fetched from GitHub API.
 
+## JSON-driven repo list
+
+Edit this file directly to control monitored repos:
+- `/Users/sunkewei/git/typhfeng/project_track/config/repo_manifest.json`
+
+Schema:
+```json
+{
+  "search_root": "/Users/sunkewei/git/typhfeng",
+  "repos": [
+    { "path": "/Users/sunkewei/git/typhfeng/poly", "track": "finance", "enabled": true }
+  ]
+}
+```
+
+Track values:
+- `finance`
+- `engineering`
+- `soc_auto_design`
+- `family`
+
+Regenerate manifest from root:
+```bash
+cd /Users/sunkewei/git/typhfeng/project_track
+./scripts/rebuild_repo_manifest.py --root ~/git/typhfeng --manifest ./config/repo_manifest.json --exclude project_track
+```
+
 ## Notes
 
 - This repo is independent from `/Users/sunkewei/work/daytalk2026`.
-- Default scan scope is `/Users/sunkewei/git/typhfeng`; edit `config/track_config.json` if needed.
-- `include_repos` in `config/track_config.json` is the authoritative monitored list.
+- Default scan scope is `~/git/typhfeng`; edit `config/track_config.json` if needed.
+- `config/repo_manifest.json` is the authoritative list for manual repo specification.
 - Cache TTL defaults to 120 seconds to balance freshness and scan cost.

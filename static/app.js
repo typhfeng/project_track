@@ -278,7 +278,8 @@ function renderManualRepoTable() {
 
   const include = configData.include_repos || [];
   const overrides = configData.track_overrides || {};
-  meta.textContent = `${include.length} manually included repos`;
+  const root = configData.repo_manifest?.search_root || '-';
+  meta.textContent = `${include.length} repos in manifest | search_root: ${root}`;
   body.innerHTML = include
     .map((p) => {
       const track = overrides[p] || 'auto';

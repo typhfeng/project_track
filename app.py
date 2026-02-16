@@ -44,6 +44,38 @@ def _write_config_raw(cfg: dict[str, Any]) -> None:
         f.write("\n")
 
 
+def _manifest_path(cfg: dict[str, Any]) -> Path:
+    raw = str(cfg.get("repo_manifest_path", "config/repo_manifest.json")).strip()
+    p = Path(raw)
+    if p.is_absolute():
+        return p
+    return (Path(CONFIG_PATH).resolve().parent / p).resolve()
+
+
+def _read_manifest(cfg: dict[str, Any]) -> dict[str, Any]:
+    path = _manifest_path(cfg)
+    if not path.is_file():
+        return {
+            "search_root": "~/git/typhfeng",
+            "repos": [],
+        }
+    with open(path, "r", encoding="utf-8") as f:
+        raw = json.load(f)
+    if not isinstance(raw.get("repos"), list):
+        raw["repos"] = []
+    if "search_root" not in raw:
+        raw["search_root"] = "~/git/typhfeng"
+    return raw
+
+
+def _write_manifest(cfg: dict[str, Any], manifest: dict[str, Any]) -> None:
+    path = _manifest_path(cfg)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+
+
 def _get_cache_ttl() -> int:
     cfg = load_config(CONFIG_PATH)
     return cfg.cache_ttl_seconds
@@ -103,11 +135,29 @@ def api_refresh():
 @app.route("/api/config")
 def api_config():
     cfg = _read_config_raw()
+    manifest = _read_manifest(cfg)
+    include = list(cfg.get("include_repos", []))
+    overrides = dict(cfg.get("track_overrides", {}))
+    for item in manifest.get("repos", []):
+        if not isinstance(item, dict):
+            continue
+        if item.get("enabled", True) is False:
+            continue
+        p = str(item.get("path", "")).strip()
+        if not p:
+            continue
+        if p not in include:
+            include.append(p)
+        t = str(item.get("track", "")).strip()
+        if t:
+            overrides[p] = t
     return jsonify({
         "owner": cfg.get("owner", ""),
         "scan_roots": cfg.get("scan_roots", []),
-        "include_repos": cfg.get("include_repos", []),
-        "track_overrides": cfg.get("track_overrides", {}),
+        "include_repos": include,
+        "track_overrides": overrides,
+        "repo_manifest_path": str(_manifest_path(cfg)),
+        "repo_manifest": manifest,
         "track_options": sorted(TRACK_OPTIONS),
         "config_path": CONFIG_PATH,
     })
@@ -128,25 +178,35 @@ def api_add_repo():
 
     track = raw_track if raw_track in TRACK_OPTIONS else ""
     cfg = _read_config_raw()
+    manifest = _read_manifest(cfg)
 
-    include = cfg.setdefault("include_repos", [])
-    if repo_path not in include:
-        include.append(repo_path)
+    repos = manifest.setdefault("repos", [])
+    found = False
+    for item in repos:
+        if not isinstance(item, dict):
+            continue
+        if os.path.abspath(os.path.expanduser(str(item.get("path", "")))) != repo_path:
+            continue
+        item["path"] = repo_path
+        item["enabled"] = True
+        if track:
+            item["track"] = track
+        found = True
+        break
 
-    overrides = cfg.setdefault("track_overrides", {})
-    if track:
-        overrides[repo_path] = track
-    elif repo_path not in overrides:
-        # Keep empty to allow auto-classification.
-        pass
+    if not found:
+        entry = {"path": repo_path, "enabled": True}
+        if track:
+            entry["track"] = track
+        repos.append(entry)
 
-    _write_config_raw(cfg)
+    _write_manifest(cfg, manifest)
     _invalidate_cache()
     data = load_dashboard(force=True)
     return jsonify({
         "ok": True,
         "path": repo_path,
-        "track": overrides.get(repo_path, ""),
+        "track": track,
         "total_repos": data.get("summary", {}).get("total_repos", 0),
     })
 
@@ -160,19 +220,22 @@ def api_remove_repo():
 
     repo_path = os.path.abspath(os.path.expanduser(raw_path))
     cfg = _read_config_raw()
-    include = cfg.setdefault("include_repos", [])
-    overrides = cfg.setdefault("track_overrides", {})
+    manifest = _read_manifest(cfg)
+    repos = manifest.setdefault("repos", [])
 
-    changed = False
-    if repo_path in include:
-        include.remove(repo_path)
-        changed = True
-    if repo_path in overrides:
-        del overrides[repo_path]
-        changed = True
-
+    original_len = len(repos)
+    kept = []
+    for item in repos:
+        if not isinstance(item, dict):
+            continue
+        p = os.path.abspath(os.path.expanduser(str(item.get("path", ""))))
+        if p == repo_path:
+            continue
+        kept.append(item)
+    changed = len(kept) != original_len
     if changed:
-        _write_config_raw(cfg)
+        manifest["repos"] = kept
+        _write_manifest(cfg, manifest)
         _invalidate_cache()
 
     data = load_dashboard(force=True)

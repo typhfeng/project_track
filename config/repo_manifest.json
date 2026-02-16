@@ -1,0 +1,60 @@
+{
+  "search_root": "/Users/sunkewei/git/typhfeng",
+  "repos": [
+    {
+      "path": "/Users/sunkewei/git/typhfeng/booksim2",
+      "track": "engineering",
+      "enabled": true
+    },
+    {
+      "path": "/Users/sunkewei/git/typhfeng/chuyin_trader",
+      "track": "finance",
+      "enabled": true
+    },
+    {
+      "path": "/Users/sunkewei/git/typhfeng/cocotbext-axi",
+      "track": "engineering",
+      "enabled": true
+    },
+    {
+      "path": "/Users/sunkewei/git/typhfeng/crypto-trading-open",
+      "track": "finance",
+      "enabled": true
+    },
+    {
+      "path": "/Users/sunkewei/git/typhfeng/daily_stock_analysis",
+      "track": "finance",
+      "enabled": true
+    },
+    {
+      "path": "/Users/sunkewei/git/typhfeng/mlfinlab",
+      "track": "finance",
+      "enabled": true
+    },
+    {
+      "path": "/Users/sunkewei/git/typhfeng/occamy",
+      "track": "engineering",
+      "enabled": true
+    },
+    {
+      "path": "/Users/sunkewei/git/typhfeng/open_deep_research",
+      "track": "engineering",
+      "enabled": true
+    },
+    {
+      "path": "/Users/sunkewei/git/typhfeng/opentitan",
+      "track": "engineering",
+      "enabled": true
+    },
+    {
+      "path": "/Users/sunkewei/git/typhfeng/stk",
+      "track": "finance",
+      "enabled": true
+    },
+    {
+      "path": "/Users/sunkewei/git/typhfeng/poly",
+      "enabled": true,
+      "track": "finance"
+    }
+  ]
+}
