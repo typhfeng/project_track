@@ -51,16 +51,22 @@ def index() -> str:
 @app.route("/api/dashboard")
 def api_dashboard():
     refresh = request.args.get("refresh", "0") == "1"
-    data = load_dashboard(force=refresh)
-    return jsonify(data)
+    try:
+        data = load_dashboard(force=refresh)
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"ok": False, "error": f"dashboard scan failed: {e}"}), 500
 
 
 @app.route("/api/search")
 def api_search():
     q = request.args.get("q", "")
-    data = load_dashboard(force=False)
-    results = search_key_issues(data, q, limit=100)
-    return jsonify({"query": q, "count": len(results), "results": results})
+    try:
+        data = load_dashboard(force=False)
+        results = search_key_issues(data, q, limit=100)
+        return jsonify({"query": q, "count": len(results), "results": results})
+    except Exception as e:
+        return jsonify({"query": q, "count": 0, "results": [], "error": str(e)}), 500
 
 
 @app.route("/api/refresh", methods=["POST"])
@@ -70,6 +76,15 @@ def api_refresh():
         "ok": True,
         "generated_at": data.get("generated_at"),
         "total_repos": data.get("summary", {}).get("total_repos", 0),
+    })
+
+
+@app.route("/api/health")
+def api_health():
+    return jsonify({
+        "ok": True,
+        "config_path": CONFIG_PATH,
+        "cwd": str(BASE_DIR),
     })
 
 

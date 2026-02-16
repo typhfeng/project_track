@@ -6,6 +6,7 @@ import json
 import os
 import re
 import subprocess
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -43,8 +44,12 @@ def load_config(config_path: str) -> RepoConfig:
 
 
 def run_cmd(args: list[str]) -> tuple[int, str]:
-    proc = subprocess.run(args, capture_output=True, text=True, check=False)
-    return proc.returncode, proc.stdout.strip()
+    try:
+        proc = subprocess.run(args, capture_output=True, text=True, check=False)
+        return proc.returncode, proc.stdout.strip()
+    except FileNotFoundError:
+        # Keep scanner resilient when optional tools are missing in PATH.
+        return 127, ""
 
 
 def discover_git_repos(cfg: RepoConfig) -> list[str]:
@@ -216,33 +221,49 @@ def weekly_commit_counts(repo: str, weeks: int = 12) -> dict[str, int]:
 
 
 def collect_issue_matches(repo: str, max_count: int = 120) -> list[dict[str, Any]]:
-    cmd = [
-        "rg",
-        "-n",
-        "-S",
-        "-i",
-        "--hidden",
-        "--glob",
-        "!.git",
-        "--glob",
-        "!venv/**",
-        "--glob",
-        "!.venv/**",
-        "--glob",
-        "!node_modules/**",
-        "--glob",
-        "!build/**",
-        "--glob",
-        "!output/**",
-        "--glob",
-        "!dist/**",
-        "--max-filesize",
-        "1M",
-        "--max-count",
-        str(max_count),
-        ISSUE_REGEX,
-        repo,
-    ]
+    if shutil.which("rg"):
+        cmd = [
+            "rg",
+            "-n",
+            "-S",
+            "-i",
+            "--hidden",
+            "--glob",
+            "!.git",
+            "--glob",
+            "!venv/**",
+            "--glob",
+            "!.venv/**",
+            "--glob",
+            "!node_modules/**",
+            "--glob",
+            "!build/**",
+            "--glob",
+            "!output/**",
+            "--glob",
+            "!dist/**",
+            "--max-filesize",
+            "1M",
+            "--max-count",
+            str(max_count),
+            ISSUE_REGEX,
+            repo,
+        ]
+    else:
+        # Fallback for environments where ripgrep is not available.
+        cmd = [
+            "grep",
+            "-RInE",
+            ISSUE_REGEX,
+            repo,
+            "--exclude-dir=.git",
+            "--exclude-dir=venv",
+            "--exclude-dir=.venv",
+            "--exclude-dir=node_modules",
+            "--exclude-dir=build",
+            "--exclude-dir=output",
+            "--exclude-dir=dist",
+        ]
     code, out = run_cmd(cmd)
     if code not in (0, 1) or not out:
         return []

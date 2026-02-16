@@ -8,6 +8,20 @@ const colors = {
 let dashboard = null;
 let charts = {};
 
+function showError(message) {
+  const summary = document.getElementById('summaryCards');
+  const tracks = document.getElementById('trackCards');
+  const table = document.getElementById('repoTableBody');
+  const issueList = document.getElementById('issueList');
+  const meta = document.getElementById('searchMeta');
+  const msg = `<article class="card"><div class="label">Error</div><div>${message}</div></article>`;
+  summary.innerHTML = msg;
+  tracks.innerHTML = '';
+  table.innerHTML = '';
+  issueList.innerHTML = `<div class="muted">${message}</div>`;
+  meta.textContent = '0 results';
+}
+
 function number(value) {
   return new Intl.NumberFormat('en-US').format(value || 0);
 }
@@ -241,7 +255,12 @@ function renderIssues(results, query) {
 
 async function loadDashboard(refresh = false) {
   const res = await fetch(`/api/dashboard${refresh ? '?refresh=1' : ''}`);
-  dashboard = await res.json();
+  const payload = await res.json();
+  if (!res.ok) {
+    showError(payload.error || `dashboard request failed (${res.status})`);
+    return;
+  }
+  dashboard = payload;
   setGeneratedAt();
   renderSummaryCards();
   renderTrackCards();
@@ -269,6 +288,10 @@ function bindEvents() {
     searchTimer = setTimeout(async () => {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
       const data = await res.json();
+      if (!res.ok) {
+        renderIssues([], q);
+        return;
+      }
       renderIssues(data.results || [], q);
     }, 260);
   });
