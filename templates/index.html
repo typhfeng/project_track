@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Track</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid"></div>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Typhfeng Portfolio Monitor</p>
+          <h1>Project Track Dashboard</h1>
+          <p class="subtitle">
+            Finance · Engineering · SoC Auto Design · Family
+          </p>
+        </div>
+        <div class="controls">
+          <button id="refreshBtn" class="btn-primary">Refresh Scan</button>
+          <p id="generatedAt" class="muted">Generated: -</p>
+        </div>
+      </header>
+
+      <section id="summaryCards" class="cards"></section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Track Summary</h2>
+        </div>
+        <div id="trackCards" class="track-cards"></div>
+      </section>
+
+      <section class="grid-two">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Commit Trend (12 Weeks)</h2>
+          </div>
+          <canvas id="trendChart"></canvas>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Time Allocation (Commits 30d)</h2>
+          </div>
+          <canvas id="allocationChart"></canvas>
+        </article>
+      </section>
+
+      <section class="grid-two">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Track Throughput</h2>
+          </div>
+          <canvas id="throughputChart"></canvas>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Repo Progress Index</h2>
+          </div>
+          <canvas id="progressChart"></canvas>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head row-between">
+          <h2>Key Problem Search</h2>
+          <input
+            id="searchInput"
+            class="search"
+            type="text"
+            placeholder="Search TODO/FIXME/BUG/commit issues"
+          />
+        </div>
+        <div id="searchMeta" class="muted">0 results</div>
+        <div id="issueList" class="issue-list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Repository Status Board</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Repo</th>
+                <th>Track</th>
+                <th>Branch / Sync</th>
+                <th>30d Commits</th>
+                <th>Dirty</th>
+                <th>Issue Hits</th>
+                <th>Progress</th>
+                <th>Last Commit</th>
+              </tr>
+            </thead>
+            <tbody id="repoTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

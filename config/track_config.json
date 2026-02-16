@@ -1,0 +1,19 @@
+{
+  "owner": "typhfeng",
+  "scan_roots": [
+    "/Users/sunkewei"
+  ],
+  "max_repo_depth": 8,
+  "cache_ttl_seconds": 120,
+  "exclude_paths": [
+    "/Users/sunkewei/git/typhfeng/project_track"
+  ],
+  "track_overrides": {
+    "/Users/sunkewei/work/daytalk2026": "engineering",
+    "/Users/sunkewei/finance/poly": "finance",
+    "/Users/sunkewei/finance/typhfeng/stk": "finance",
+    "/Users/sunkewei/work/ffinance/stk": "finance",
+    "/Users/sunkewei/trading/trading_moomoo": "finance",
+    "/Users/sunkewei/trading/WallTrading-Bot-MooMoo-Futu": "finance"
+  }
+}
