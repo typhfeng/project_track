@@ -76,6 +76,60 @@
 
       <section class="grid-two">
         <article class="panel">
+          <div class="panel-head row-between">
+            <h2>Group Navigator</h2>
+            <button id="syncGroupBtn" class="btn-secondary">Sync Group</button>
+          </div>
+          <div id="selectedGroupMeta" class="muted">Selected group: -</div>
+          <div id="groupRepoList" class="issue-list"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head row-between">
+            <h2>Repo Review</h2>
+            <div class="manual-row">
+              <button id="syncRepoBtn" class="btn-secondary">Sync Repo</button>
+            </div>
+          </div>
+          <div id="selectedRepoMeta" class="muted">Selected repo: -</div>
+          <div class="manual-row">
+            <input id="commitMsgInput" class="search" type="text" placeholder="Commit message" />
+            <button id="commitRepoBtn" class="btn-secondary">Commit + Push</button>
+          </div>
+          <div class="manual-row">
+            <input id="issueTitleInput" class="search" type="text" placeholder="New issue title" />
+          </div>
+          <div class="manual-row">
+            <input id="issueBodyInput" class="search" type="text" placeholder="New issue body" />
+            <button id="createIssueBtn" class="btn-secondary">Create Issue</button>
+          </div>
+          <div class="manual-row">
+            <input id="todoInput" class="search" type="text" placeholder="Add TODO item" />
+            <button id="addTodoBtn" class="btn-secondary">Add TODO</button>
+          </div>
+          <div class="grid-two-inner">
+            <div>
+              <h3>Recent Commits</h3>
+              <div id="repoCommits" class="issue-list"></div>
+            </div>
+            <div>
+              <h3>Open Issues</h3>
+              <div id="repoIssues" class="issue-list"></div>
+            </div>
+            <div>
+              <h3>TODO List</h3>
+              <div id="repoTodos" class="issue-list"></div>
+            </div>
+            <div>
+              <h3>Last Commit Files</h3>
+              <div id="repoFiles" class="issue-list"></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid-two">
+        <article class="panel">
           <div class="panel-head">
             <h2>Commit Trend (12 Weeks)</h2>
           </div>

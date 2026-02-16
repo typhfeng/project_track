@@ -127,6 +127,11 @@ h1 {
 
 .track {
   border-left: 4px solid var(--accent);
+  cursor: pointer;
+}
+
+.track.active {
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 .panel {
@@ -234,6 +239,21 @@ th {
   border-color: var(--accent);
 }
 
+.grid-two-inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.repo-item {
+  cursor: pointer;
+}
+
+.repo-item.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
 .issue-list {
   display: grid;
   gap: 10px;
@@ -291,6 +311,10 @@ th {
 
 @media (min-width: 980px) {
   .grid-two {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .grid-two-inner {
     grid-template-columns: 1fr 1fr;
   }
 }

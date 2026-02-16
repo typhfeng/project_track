@@ -47,14 +47,14 @@
       "enabled": true
     },
     {
-      "path": "/Users/sunkewei/git/typhfeng/stk",
+      "path": "/Users/sunkewei/git/typhfeng/poly",
       "track": "finance",
       "enabled": true
     },
     {
-      "path": "/Users/sunkewei/git/typhfeng/poly",
-      "enabled": true,
-      "track": "finance"
+      "path": "/Users/sunkewei/git/typhfeng/stk",
+      "track": "finance",
+      "enabled": true
     }
   ]
 }

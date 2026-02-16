@@ -479,6 +479,9 @@ def scan_repositories(config_path: str) -> dict[str, Any]:
         metrics = {
             "id": repo_id(repo),
             "name": name,
+            "owner": owner,
+            "full_name": f"{owner}/{name}",
+            "display_name": f"{name} · {Path(repo).parent.name}",
             "path": repo,
             "remote": remote,
             "track": track,

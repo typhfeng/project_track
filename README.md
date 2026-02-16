@@ -9,6 +9,15 @@ A standalone Web GUI to monitor and analyze personal project progress across all
   - add local repo path
   - assign/override track
   - remove repo from monitored list
+- Supports track-first review workflow:
+  - click track summary card to open group-level repo board
+  - click repo to open detailed review panel
+- Repo-level review and actions:
+  - recent commits + changed files
+  - open GitHub issues + local TODO list
+  - create GitHub issue
+  - add/edit/complete TODO entries
+  - sync/pull repo, commit and push changes
 - Classifies repos into 4 tracks:
   - Finance
   - Engineering
@@ -68,6 +77,7 @@ cd /Users/sunkewei/git/typhfeng/project_track
 Notes:
 - If `GITHUB_TOKEN` (or `GH_TOKEN`) is set for the same owner, private repos are included.
 - Without token, only public repos are fetched from GitHub API.
+- `Create Issue` in Web GUI also requires `GITHUB_TOKEN`/`GH_TOKEN`.
 
 ## JSON-driven repo list
 
